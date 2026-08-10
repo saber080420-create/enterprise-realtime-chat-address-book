@@ -1,0 +1,48 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL:jdbc:mysql://localhost:3306/big_event?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Hong_Kong}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:demo123456}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:root@123456}
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 25MB   # 原为10MB，提升以支持聊天通用文件≤20MB
+      max-request-size: 26MB # 原为15MB，略大于文件上限，包含表单开销
+  # 静态资源访问配置
+  web:
+    resources:
+      static-locations: classpath:/static/,file:uploads/
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true #开启驼峰命名和下划线命名的自动转换
+
+# 追加调试日志，便于定位问题
+logging:
+  level:
+    org.springframework.web: INFO
+    org.springframework.http.converter: DEBUG
+    org.springframework: INFO
+    org.apache.ibatis: DEBUG
+    org.mybatis: DEBUG
+    org.itheima: DEBUG
+
+# 文件上传配置
+file:
+  upload:
+    path: uploads
+    url: ${FILE_BASE_URL:http://localhost:8081}
+
+# 聊天历史功能开关（关闭历史查询，保持接口返回空集合）
+chat:
+  history:
+    enabled: true

@@ -1,0 +1,28 @@
+# Local backups and machine-specific tools
+.backups/
+Redis-x64-3.2.100/
+MySQL Server 8.4/
+.vercel/
+
+# Dependencies and build output
+**/node_modules/
+**/target/
+**/dist/
+
+# IDE metadata
+**/.idea/
+**/.vscode/
+**/.xcodemap/
+
+# Runtime data and secrets
+big-event/uploads/
+*.log
+.env
+.env.*
+!.env.example
+application-local.yml
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+

@@ -1,0 +1,41 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: enterprise-chat-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: demo123456
+      MYSQL_DATABASE: big_event
+      TZ: Asia/Hong_Kong
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./big_event.sql:/docker-entrypoint-initdb.d/01-big-event.sql:ro
+      - ./big-event/src/main/resources/db/migration/V7__Create_system_notice.sql:/docker-entrypoint-initdb.d/07-system-notice.sql:ro
+      - ./big-event/src/main/resources/db/migration/V8__Create_group_announcement.sql:/docker-entrypoint-initdb.d/08-group-announcement.sql:ro
+      - ./big-event/src/main/resources/db/migration/V9__Group_announcement_read_and_status.sql:/docker-entrypoint-initdb.d/09-group-announcement-read.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pdemo123456"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: enterprise-chat-redis
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "root@123456"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "root@123456", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mysql-data:
+  redis-data:
