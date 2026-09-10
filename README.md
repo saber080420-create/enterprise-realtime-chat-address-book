@@ -7,7 +7,7 @@
 - 前端：Vue 3、Vite、Element Plus、Pinia、ECharts
 - 后端：Spring Boot 3、MyBatis、MySQL、Redis、WebSocket
 
-## 笔记本快速启动（推荐）
+## 快速启动（推荐）
 
 先安装 Git、JDK 17+、Maven 3.8+、Node.js 20+ 和 Docker Desktop，然后执行：
 
