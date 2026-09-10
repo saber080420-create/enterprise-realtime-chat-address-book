@@ -1,6 +1,7 @@
 package org.itheima;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -9,6 +10,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootTest//如果在测试类上添加了这个注解，那么将来单元测试方法执行之前会先初始化spring容器
+@EnabledIfEnvironmentVariable(named = "RUN_REDIS_TESTS", matches = "true")
 public class RedisTest {
 
     @Autowired

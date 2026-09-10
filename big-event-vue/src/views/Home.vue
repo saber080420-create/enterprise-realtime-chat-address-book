@@ -386,6 +386,10 @@ onUnmounted(() => {
         </el-menu-item>
 
         <!-- 新增：聊天模块入口 -->
+        <el-menu-item index="/ai-assistant">
+          <el-icon><ChatDotRound /></el-icon>
+          <template #title>AI 助手</template>
+        </el-menu-item>
         <el-menu-item index="/chat">
           <el-icon><ChatDotRound /></el-icon>
           <template #title>聊天</template>

@@ -35,6 +35,8 @@ logging:
     org.apache.ibatis: DEBUG
     org.mybatis: DEBUG
     org.itheima: DEBUG
+    # Knowledge SQL binds can contain uploaded document bodies; never log mapper parameters.
+    org.itheima.ai: INFO
 
 # 文件上传配置
 file:
@@ -46,3 +48,18 @@ file:
 chat:
   history:
     enabled: true
+
+ai:
+  rag:
+    enabled: ${AI_RAG_ENABLED:false}
+    ollama-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    model: ${OLLAMA_EMBED_MODEL:bge-m3}
+    index-version: ${AI_INDEX_VERSION:bge-m3-1024-chunk600-v1}
+    jdbc-url: ${PGVECTOR_URL:jdbc:postgresql://localhost:5433/enterprise_knowledge}
+    username: ${PGVECTOR_USERNAME:knowledge}
+    password: ${PGVECTOR_PASSWORD:knowledge_local_demo}
+    min-score: ${AI_RAG_MIN_SCORE:0.45}
+  deepseek:
+    api-key: ${DEEPSEEK_API_KEY:}
+    base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+    model: ${DEEPSEEK_CHAT_MODEL:deepseek-v4-flash}

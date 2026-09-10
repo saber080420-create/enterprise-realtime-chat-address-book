@@ -1,0 +1,19 @@
+{
+  "description": "冻结的合成检索冒烟集，不代表生产数据；只评测 embedding 排序与阈值，不评测回答质量。",
+  "documents": [
+    {"id": 1, "text": "休假制度：员工年度休假须提前五个工作日提交至人事部门审批。"},
+    {"id": 2, "text": "停车通知：地下停车场星期六进行消防设备检修，当天禁止车辆驶入。"},
+    {"id": 3, "text": "差旅报销：出差结束后三个工作日内提交报销申请，材料包括行程说明、发票和直属主管确认记录。"}
+  ],
+  "cases": [
+    {"id": "R01", "query": "年度休假提前几天申请？", "expectedDocument": 1},
+    {"id": "R02", "query": "想休息几天，应该找哪个部门批准？", "expectedDocument": 1},
+    {"id": "R03", "query": "星期六地下停车场能开车进去吗？", "expectedDocument": 2},
+    {"id": "R04", "query": "周末车库为什么不让进？", "expectedDocument": 2},
+    {"id": "R05", "query": "差旅报销需要准备哪些材料？", "expectedDocument": 3},
+    {"id": "R06", "query": "出差回来申请费用，需要带什么凭证？", "expectedDocument": 3},
+    {"id": "R07", "query": "火星独角兽量子传送门 ZXQ987654 的启动密码是什么？", "expectedDocument": 0},
+    {"id": "R08", "query": "如何用吉他演奏爵士和弦？", "expectedDocument": 0},
+    {"id": "R09", "query": "红烧茄子怎么做才好吃？", "expectedDocument": 0}
+  ]
+}
