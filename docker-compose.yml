@@ -15,6 +15,8 @@ services:
       - ./big-event/src/main/resources/db/migration/V7__Create_system_notice.sql:/docker-entrypoint-initdb.d/07-system-notice.sql:ro
       - ./big-event/src/main/resources/db/migration/V8__Create_group_announcement.sql:/docker-entrypoint-initdb.d/08-group-announcement.sql:ro
       - ./big-event/src/main/resources/db/migration/V9__Group_announcement_read_and_status.sql:/docker-entrypoint-initdb.d/09-group-announcement-read.sql:ro
+      - ./big-event/src/main/resources/db/knowledge/schema.sql:/docker-entrypoint-initdb.d/10-ai-document.sql:ro
+      - ./big-event/src/main/resources/db/knowledge/byok.sql:/docker-entrypoint-initdb.d/11-ai-byok.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pdemo123456"]
       interval: 5s
@@ -36,6 +38,34 @@ services:
       timeout: 5s
       retries: 20
 
+  pgvector:
+    image: pgvector/pgvector@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+    profiles: [rag]
+    environment:
+      POSTGRES_DB: enterprise_knowledge
+      POSTGRES_USER: knowledge
+      POSTGRES_PASSWORD: ${PGVECTOR_PASSWORD:-knowledge_local_demo}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - knowledge-data:/var/lib/postgresql/data
+      - ./big-event/src/main/resources/db/vector/schema.sql:/docker-entrypoint-initdb.d/01-vector.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U knowledge -d enterprise_knowledge"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  ollama:
+    image: ollama/ollama@sha256:32931b46719f673c05fdbaa81ccb26da18ea4a1c57590a754874ab28ba269eb2
+    profiles: [rag]
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
 volumes:
   mysql-data:
   redis-data:
+  knowledge-data:
+  ollama-data:

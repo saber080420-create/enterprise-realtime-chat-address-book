@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import java.util.Map;
 
 @Component
-public class LoginInterceptor implements HandlerInterceptor {
+public class LoginInterceptor implements AsyncHandlerInterceptor {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
@@ -53,6 +53,11 @@ public class LoginInterceptor implements HandlerInterceptor {
 //            不放行
             return false;
         }
+    }
+
+    @Override
+    public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        ThreadLocalUtil.remove();
     }
 
     @Override

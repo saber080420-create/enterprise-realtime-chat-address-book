@@ -29,6 +29,11 @@ const routes = [
     component: Home,
     children: [
       {
+        path: '/ai-assistant',
+        name: 'AiAssistant',
+        component: () => import('@/views/AiAssistant.vue')
+      },
+      {
         path: '/welcome',
         name: 'Welcome',
         component: () => import('@/views/Welcome.vue')

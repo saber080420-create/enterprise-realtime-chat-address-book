@@ -61,7 +61,22 @@ mvn spring-boot:run
 - Redis：6379
 - WebSocket：前端通过 Vite 代理连接 `/api/ws`
 
-## 面试展示建议
+## AI 二次开发（进行中）
+
+新增侧边栏「AI 助手」：DeepSeek 多轮流式问答、停止生成、重试、Token 与耗时展示。
+后端设置 `DEEPSEEK_API_KEY` 后启动；未设置时原项目可继续启动，AI 页面显示未配置。
+支持通用问答和公告问答。公告问答以关键词检索用户有权查看的已发布公告，返回参考片段并支持重新鉴权查看来源；无匹配资料时明确提示。
+支持关键词基线和可选的 BGE-M3 + PGVector 语义检索，开启向量服务后同步可见公告索引即可使用。
+安装和限制见 [向量检索说明](docs/vector-rag.md)。个人 TXT/Markdown 文档支持入库、关键词及向量问答、所有权隔离、引用和移出；需执行 MySQL 文档表及 PGVector 文档索引表迁移，见 [文档知识库说明](docs/document-knowledge.md)。PDF/Word 暂未实现。对话仅保存在页面内存中。
+详细范围、配置、验证记录与面试知识卡片见 [AI 开发记录](docs/ai-development.md)。
+新增按群和时间范围的群聊摘要与行动项提取，复查成员权限、排除撤回消息，结构和引用校验后展示；不自动创建任务。限制与验收见 [群聊摘要说明](docs/group-summary.md)。
+第一阶段收尾材料：[验收报告](docs/phase-one-acceptance.md)、[简历与面试](docs/resume-and-interview.md)、[演示步骤](docs/demo-runbook.md)。核心链路已实测，仍有报告列出的验收尾项，非生产就绪。
+
+## 原项目面试展示建议
 
 面试前先运行 `docker compose up -d`，分别启动前后端，并准备两个浏览器窗口登录不同账号。展示顺序建议为：登录与通讯录 → 私聊实时收发 → 群聊 → 公告 → 在线状态和数据统计。
 
+# 最新更新：个人模型配置
+
+AI 助手支持每个用户保存、替换、测试和删除自己的 DeepSeek API Key（BYOK），凭据加密存储、按登录用户隔离，不回退使用公共 Key。
+升级必须先执行新表迁移并配置一次服务器加密主密钥，详见 [BYOK 使用与升级说明](docs/byok.md)。原 AI 文档中的全局 Key 启动方法不再适用于页面聊天。

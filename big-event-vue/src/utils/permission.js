@@ -42,7 +42,7 @@ export const hasPagePermission = (pageName, role) => {
     return false
   }
   
-  return rolePermissions[role].pages.includes(pageName)
+  return pageName === 'AiAssistant' || rolePermissions[role].pages.includes(pageName)
 }
 
 /**

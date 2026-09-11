@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS ai_user_credential (
+    user_id INT PRIMARY KEY,
+    encrypted_key VARCHAR(1024) NOT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
