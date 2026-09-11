@@ -107,7 +107,7 @@ async function send() {
     }
   }
   history.push({ role: 'user', content: prompt })
-  while (history.length > 3  || history.reduce((n, m) => n + m.content.length, 0) > 16000) history.splice(0, 2)
+  while (history.length > 19  || history.reduce((n, m) => n + m.content.length, 0) > 16000) history.splice(0, 2)
   messages.value.push({ role: 'user', content: prompt }, { role: 'assistant', content: '', state: 'generating' })
   const answer = messages.value[messages.value.length - 1]
   input.value = ''
