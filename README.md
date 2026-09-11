@@ -1,15 +1,79 @@
-# 企业实时聊天通讯录系统
+<div align="center">
 
-毕业设计项目，包含企业通讯录、部门组织架构、私聊/群聊、公告、在线状态与数据统计等功能。
+# Enterprise Realtime Chat & Knowledge Assistant
+
+面向企业内部协作的实时通讯录、即时通信与可追溯 AI 知识助手。
+
+[![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.1-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)](https://redis.io/)
+[![RAG](https://img.shields.io/badge/RAG-BGE--M3%20%2B%20PGVector-6C63FF)](#ai-知识助手)
+
+</div>
+
+## 项目概览
+
+本项目将企业通讯录、组织架构和实时聊天整合在同一套前后端系统中，并在业务权限之上扩展 AI 知识助手。助手支持 DeepSeek 流式对话、公告与个人文档检索、可选的本地向量化，以及基于真实群消息的摘要和行动项提取。
+
+项目强调三件事：**回答有来源、检索受权限约束、AI 故障不影响基础协作功能**。
+
+## 核心能力
+
+| 模块 | 能力 |
+| --- | --- |
+| 企业通讯录 | 部门组织架构、内部成员、外部联系人、常用联系人 |
+| 实时通信 | 私聊、群聊、在线状态、离线消息与 WebSocket 推送 |
+| 协作信息 | 企业公告、群公告、系统通知与数据统计 |
+| AI 对话 | DeepSeek 多轮问答、SSE 流式输出、停止生成、重试、Token 与耗时展示 |
+| 个人模型配置 | BYOK：保存、替换、测试和删除自己的 DeepSeek Key；AES-GCM 加密与用户隔离 |
+| 知识问答 | 已发布公告和个人 TXT/Markdown 文档检索，返回引用并在查看原文时重新鉴权 |
+| 向量 RAG | 可选 Ollama + BGE-M3 + PGVector，支持索引同步、相似度阈值和过期索引校验 |
+| 群聊摘要 | 按群与时间范围总结消息、提取行动项，过滤撤回消息并校验引用来源 |
+
+## 系统架构
+
+```mermaid
+flowchart LR
+    U[Browser] --> V[Vue 3 + Element Plus]
+    V -->|REST / SSE| S[Spring Boot]
+    V -->|WebSocket| S
+    S --> M[(MySQL)]
+    S --> R[(Redis)]
+    S --> D[DeepSeek API]
+    S --> O[Ollama / BGE-M3]
+    S --> P[(PostgreSQL + PGVector)]
+
+    M -. 权限与权威业务数据 .-> S
+    O -. Embedding .-> S
+    P -. 向量候选 .-> S
+```
+
+MySQL 始终是用户、权限和业务内容的权威数据源；PGVector 只保存检索副本。向量命中后，后端仍会依据当前用户权限、原文状态和内容指纹复查，避免旧索引泄露已撤回或无权访问的信息。
 
 ## 技术栈
 
-- 前端：Vue 3、Vite、Element Plus、Pinia、ECharts
-- 后端：Spring Boot 3、MyBatis、MySQL、Redis、WebSocket
+| 层级 | 技术 |
+| --- | --- |
+| Web | Vue 3、Vite、Element Plus、Pinia、Axios、ECharts |
+| Server | Java 17、Spring Boot 3、MyBatis、Bean Validation |
+| Realtime | Spring WebSocket、Redis |
+| Data | MySQL 8、PostgreSQL、PGVector |
+| AI | DeepSeek API、SSE、Ollama、BGE-M3、RAG |
+| Engineering | Maven、Node Test Runner、Docker Compose |
 
-## 笔记本快速启动（推荐）
+## 快速开始
 
-先安装 Git、JDK 17+、Maven 3.8+、Node.js 20+ 和 Docker Desktop，然后执行：
+### 环境要求
+
+- Git
+- JDK 17+
+- Maven 3.8+
+- Node.js 20+
+- Docker Desktop
+
+### 1. 获取代码并启动基础设施
 
 ```powershell
 git clone https://github.com/saber080420-create/enterprise-realtime-chat-address-book.git
@@ -17,66 +81,115 @@ cd enterprise-realtime-chat-address-book
 docker compose up -d
 ```
 
-等待 MySQL 和 Redis 启动完成。打开一个终端启动后端：
+首次创建数据卷时，MySQL 会自动导入演示数据和知识库表结构。请等待 MySQL 与 Redis 健康检查通过后再启动应用。
+
+### 2. 启动后端
 
 ```powershell
 cd big-event
 mvn spring-boot:run
 ```
 
-再打开一个终端启动前端：
+### 3. 启动前端
 
 ```powershell
 cd big-event-vue
-npm install
+npm ci
 npm run dev
 ```
 
-浏览器访问 <http://localhost:5173>。演示管理员账号为 `admin`，密码为 `111111`。
+访问 <http://localhost:5173>。本地演示账号为 `admin / 111111`，仅用于本机体验，部署到共享环境前请立即修改。
 
-> 第一次初始化数据库可能需要几十秒。`docker compose up -d` 只会在数据库数据卷为空时导入 SQL；如需重新初始化演示数据，可执行 `docker compose down -v` 后再次启动（该命令会删除容器中的数据库数据）。
+## AI 知识助手
 
-## 不使用 Docker
+### 启用 DeepSeek 对话
 
-1. 启动 MySQL 8 和 Redis。
-2. 依次导入根目录的 `big_event.sql`，以及 `V7`、`V8`、`V9` 三个迁移文件。
-3. 启动后端前设置相应环境变量：
+管理员先执行 `big-event/src/main/resources/db/knowledge/byok.sql`（已有数据库升级必须手动执行），并一次性生成、保存服务器加密主密钥。生成方法与备份注意事项见 [BYOK 使用与升级说明](docs/byok.md)。
+
+在启动后端的终端中加载已保存的配置：
 
 ```powershell
-$env:DB_URL='jdbc:mysql://localhost:3306/big_event?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Hong_Kong'
-$env:DB_USERNAME='root'
-$env:DB_PASSWORD='你的MySQL密码'
-$env:REDIS_HOST='localhost'
-$env:REDIS_PORT='6379'
-$env:REDIS_PASSWORD='你的Redis密码'
-$env:JWT_SECRET='请替换为随机长字符串'
+$env:AI_CREDENTIAL_MASTER_KEY=[Environment]::GetEnvironmentVariable('AI_CREDENTIAL_MASTER_KEY', 'User')
+$env:DEEPSEEK_CHAT_MODEL='deepseek-v4-flash'
 mvn spring-boot:run
 ```
 
-## 默认端口
+用户登录后，在 AI 助手右上角「模型配置」保存自己的 DeepSeek API Key，即时生效，无需重启后端。未配置时不会借用公共 Key；模型费用由用户承担。仅支持固定官方地址，测试连接只验证模型列表可访问，不保证余额充足。仓库内的 `.env.example` 不包含真实凭证。
 
-- 前端：5173
-- 后端：8081
-- MySQL：3306
-- Redis：6379
-- WebSocket：前端通过 Vite 代理连接 `/api/ws`
+### 启用本地向量检索
 
-## AI 二次开发（进行中）
+```powershell
+docker compose --profile rag up -d pgvector ollama
+docker compose exec -T ollama ollama pull bge-m3
 
-新增侧边栏「AI 助手」：DeepSeek 多轮流式问答、停止生成、重试、Token 与耗时展示。
-后端设置 `DEEPSEEK_API_KEY` 后启动；未设置时原项目可继续启动，AI 页面显示未配置。
-支持通用问答和公告问答。公告问答以关键词检索用户有权查看的已发布公告，返回参考片段并支持重新鉴权查看来源；无匹配资料时明确提示。
-支持关键词基线和可选的 BGE-M3 + PGVector 语义检索，开启向量服务后同步可见公告索引即可使用。
-安装和限制见 [向量检索说明](docs/vector-rag.md)。个人 TXT/Markdown 文档支持入库、关键词及向量问答、所有权隔离、引用和移出；需执行 MySQL 文档表及 PGVector 文档索引表迁移，见 [文档知识库说明](docs/document-knowledge.md)。PDF/Word 暂未实现。对话仅保存在页面内存中。
-详细范围、配置、验证记录与面试知识卡片见 [AI 开发记录](docs/ai-development.md)。
-新增按群和时间范围的群聊摘要与行动项提取，复查成员权限、排除撤回消息，结构和引用校验后展示；不自动创建任务。限制与验收见 [群聊摘要说明](docs/group-summary.md)。
-第一阶段收尾材料：[验收报告](docs/phase-one-acceptance.md)、[简历与面试](docs/resume-and-interview.md)、[演示步骤](docs/demo-runbook.md)。核心链路已实测，仍有报告列出的验收尾项，非生产就绪。
+$env:AI_RAG_ENABLED='true'
+cd big-event
+mvn spring-boot:run
+```
 
-## 原项目面试展示建议
+启用后，可在 AI 助手页面同步当前用户可见的公告或个人文档索引。默认相似度阈值 `0.45` 是待校准参数，不代表准确率。
 
-面试前先运行 `docker compose up -d`，分别启动前后端，并准备两个浏览器窗口登录不同账号。展示顺序建议为：登录与通讯录 → 私聊实时收发 → 群聊 → 公告 → 在线状态和数据统计。
+## 配置说明
 
-# 最新更新：个人模型配置
+| 环境变量 | 默认值 | 用途 |
+| --- | --- | --- |
+| `DB_URL` | `jdbc:mysql://localhost:3306/big_event...` | MySQL 连接地址 |
+| `DB_USERNAME` | `root` | MySQL 用户名 |
+| `DB_PASSWORD` | `demo123456` | 本地演示数据库密码 |
+| `REDIS_HOST` / `REDIS_PORT` | `localhost` / `6379` | Redis 地址 |
+| `REDIS_PASSWORD` | `root@123456` | 本地演示 Redis 密码 |
+| `AI_CREDENTIAL_MASTER_KEY` | 空 | 用户凭据加密主密钥，32 字节 Base64；须安全持久化和备份 |
+| `DEEPSEEK_CHAT_MODEL` | `deepseek-v4-flash` | 对话模型 |
+| `AI_RAG_ENABLED` | `false` | 是否启用向量检索 |
+| `OLLAMA_EMBED_MODEL` | `bge-m3` | 本地 Embedding 模型 |
+| `PGVECTOR_URL` | `jdbc:postgresql://localhost:5433/enterprise_knowledge` | 向量库地址 |
+| `AI_RAG_MIN_SCORE` | `0.45` | 最低余弦相似度 |
 
-AI 助手支持每个用户保存、替换、测试和删除自己的 DeepSeek API Key（BYOK），凭据加密存储、按登录用户隔离，不回退使用公共 Key。
-升级必须先执行新表迁移并配置一次服务器加密主密钥，详见 [BYOK 使用与升级说明](docs/byok.md)。原 AI 文档中的全局 Key 启动方法不再适用于页面聊天。
+更多配置示例见 [.env.example](.env.example)。
+
+## 验证
+
+```powershell
+# 后端测试
+cd big-event
+mvn test
+
+# 前端单元测试与生产构建
+cd ../big-event-vue
+npm test
+npm run build
+```
+
+Redis 集成测试默认跳过；在本机 Redis 可用时设置 `RUN_REDIS_TESTS=true` 后执行。向量和检索评测的启用方式见 [向量检索说明](docs/vector-rag.md)。
+
+## 项目结构
+
+```text
+.
+├── big-event/                 # Spring Boot 后端
+│   └── src/main/java/.../ai/  # 对话、知识检索、向量与摘要模块
+├── big-event-vue/             # Vue 3 前端
+│   └── src/views/AiAssistant.vue
+├── docs/                      # 设计、运行与验收文档
+├── docker-compose.yml         # MySQL、Redis、PGVector、Ollama
+└── .env.example               # 无真实凭证的配置模板
+```
+
+## 设计边界
+
+- 当前支持 TXT 和 Markdown 知识文档，尚未实现 PDF、Word 解析。
+- 对话记录保存在当前页面内存中，刷新后不会持久化。
+- 群聊摘要只生成结构化建议，不会自动创建任务或执行外部操作。
+- 本项目已完成核心链路验证，但尚未覆盖生产级并发、分布式限流和完整可观测性。
+
+## 文档
+
+- [AI 开发说明](docs/ai-development.md)
+- [个人 API Key 配置与升级](docs/byok.md)
+- [向量检索与评测](docs/vector-rag.md)
+- [个人文档知识库](docs/document-knowledge.md)
+- [群聊摘要设计](docs/group-summary.md)
+- [第一阶段验收记录](docs/phase-one-acceptance.md)
+- [本地演示步骤](docs/demo-runbook.md)
+
+> **Data safety:** `docker compose down -v` 会删除本项目的数据库、Redis、向量库和模型数据卷。除非明确需要重置演示环境，否则不要执行。

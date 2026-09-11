@@ -15,7 +15,7 @@ public interface ChatModelGateway {
     }
 
     interface Sink {
-        
+
         void send(String event, Map<String, Object> data) throws IOException;
     }
 

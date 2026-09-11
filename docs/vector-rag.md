@@ -62,7 +62,7 @@ mvn '-Dtest=VectorIntegrationTest' '-Dvector.integration=true' '-Dembedding.inte
 省略 `-Dembedding.integration=true` 时仅验证真实 PostgreSQL，使用确定性的测试向量，不算真实模型效果测试。
 Compose 已固定本次下载的镜像 digest，避免浮动 tag 导致复现环境变化。
 
-## 面试要点
+## 技术要点
 
 - 向量检索解决不同措辞的相近语义召回；它不能代替权限检查，也不保证答案正确。
 - PGVector 是索引副本，MySQL 是权威业务数据。双库暂时不一致时，用版本指纹避免过期召回。
